@@ -1,0 +1,17 @@
+# --- 환경변수 및 보안 ---
+.env
+
+# --- 파이썬 관련 ---
+venv/
+__pycache__/
+*.pyc
+*.sqlite3
+
+# --- Node.js 관련 ---
+node_modules/
+dist/
+.output/
+
+# --- 기타 시스템 파일 ---
+.DS_Store
+Thumbs.db
