@@ -1,0 +1,105 @@
+<template>
+  <div class="detail-view">
+    <div class="post-card">
+      <div class="post-header">
+        <span class="category-badge">🟢 관광지</span>
+        <h2 class="title">금오산 둘레길 지금 단풍 상태 완전 절정이에요! 🍁</h2>
+        <div class="meta-info">
+          <span>👤 익명작성자</span> | <span>2026.07.14 15:30</span> | <span>👀 조회 142</span>
+        </div>
+      </div>
+
+      <div class="post-content">
+        이번 주말에 금오산 다녀왔는데 단풍이 정말 예쁘게 물들었네요.<br>
+        가족들과 산책 다녀오기 딱 좋은 날씨입니다. 강추해요!
+      </div>
+
+      <div class="action-buttons">
+        <button class="btn-list" @click="$router.push('/board')">목록</button>
+        <div class="right-buttons">
+          <button class="btn-edit" @click="openPasswordModal('수정')">수정</button>
+          <button class="btn-delete" @click="openPasswordModal('삭제')">삭제</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 비밀번호 확인 모달 -->
+    <div class="modal-overlay" v-if="showModal">
+      <div class="password-modal">
+        <h3>🔒 비밀번호 확인</h3>
+        <p>게시글을 {{ modalAction }}하려면 비밀번호를 입력하세요.</p>
+        <input type="password" v-model="inputPassword" placeholder="비밀번호 입력" class="modal-input" />
+        <div class="modal-buttons">
+          <button class="btn-cancel" @click="showModal = false">취소</button>
+          <button class="btn-submit" @click="verifyPassword">확인</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue';
+
+const showModal = ref(false);
+const modalAction = ref('');
+const inputPassword = ref('');
+
+// 모달 열기 함수
+const openPasswordModal = (action) => {
+  modalAction.value = action;
+  inputPassword.value = '';
+  showModal.value = true;
+};
+
+// 비밀번호 검증 및 페이지 이동 로직
+const verifyPassword = () => {
+  if (!inputPassword.value) {
+    alert("비밀번호를 입력해주세요.");
+    return;
+  }
+  
+  // TODO: 실제로는 여기서 백엔드로 비밀번호를 보내서 검증해야 합니다.
+  // 지금은 화면 UI 흐름만 구성하기 위해 무조건 성공한다고 가정합니다.
+  
+  if (modalAction.value === '수정') {
+    alert('비밀번호가 확인되었습니다. 수정 화면으로 이동합니다.');
+    // 라우터를 이용해 수정 화면(/board/edit/1)으로 강제 이동
+    window.location.href = '/board/edit/1'; 
+  } else if (modalAction.value === '삭제') {
+    alert('게시글이 성공적으로 삭제되었습니다.');
+    window.location.href = '/board'; // 목록으로 이동
+  }
+  
+  showModal.value = false;
+};
+</script>
+
+<style scoped>
+.detail-view { max-width: 800px; margin: 0 auto; }
+.post-card { background-color: white; border-radius: 16px; padding: 40px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+
+.post-header { border-bottom: 2px solid #F0F8FF; padding-bottom: 20px; margin-bottom: 30px; }
+.category-badge { background-color: #E0F2FE; color: #0369A1; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 13px; display: inline-block; margin-bottom: 15px; }
+.title { color: #1E293B; margin: 0 0 15px 0; font-size: 24px; }
+.meta-info { color: #94A3B8; font-size: 14px; }
+
+.post-content { min-height: 200px; color: #334155; line-height: 1.8; font-size: 16px; margin-bottom: 40px; }
+
+.action-buttons { display: flex; justify-content: space-between; border-top: 1px solid #F1F5F9; padding-top: 20px; }
+button { padding: 10px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; }
+.btn-list { background-color: #F1F5F9; color: #64748B; }
+.right-buttons { display: flex; gap: 10px; }
+.btn-edit { background-color: #E0F2FE; color: #0369A1; }
+.btn-delete { background-color: #FFE4E6; color: #BE123C; }
+
+/* 모달 스타일 */
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+.password-modal { background: white; padding: 30px; border-radius: 12px; width: 300px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+.password-modal h3 { margin-top: 0; color: #1E293B; }
+.password-modal p { color: #64748B; font-size: 14px; margin-bottom: 20px; }
+.modal-input { width: 100%; padding: 10px; border: 1px solid #CBD5E1; border-radius: 8px; margin-bottom: 20px; box-sizing: border-box; }
+.modal-buttons { display: flex; justify-content: space-between; gap: 10px; }
+.modal-buttons button { flex: 1; }
+.btn-submit { background-color: #78C2F3; color: white; }
+</style>
