@@ -2,27 +2,31 @@
   <div class="course-view">
     <div class="course-header">
       <h2>🗺️ 나의 구미 당일치기 힐링 여행 코스</h2>
-      <p>"금오산에서 출발해서 맛집 탐방하고 숙소까지 한 번에 이동하는 알짜배기 코스!"</p>
+      <p>내가 찜한 명소와 맛집들을 한눈에 확인하세요!</p>
     </div>
 
     <div class="course-layout">
       <div class="timeline-section card">
         <h3 class="section-title">📍 코스 타임라인 순서</h3>
-        
-        <div class="timeline">
-          <div class="timeline-item" v-for="i in 3" :key="i">
-            <div class="node">{{ i }}</div>
+
+        <div class="timeline" v-if="courseStore.totalCount > 0">
+          <div class="timeline-item" v-for="(place, index) in courseStore.courseList" :key="place.id">
+            <div class="node">{{ index + 1 }}</div>
             <div class="content">
-              <h4>금오산 올레길 <span class="tag">🟢 관광지</span></h4>
-              <p>소요시간: 약 1시간 30분 | 주소: 구미시 금오산로</p>
+              <h4>{{ place.name }} <span class="tag">{{ place.category }}</span></h4>
+              <p>🚩 {{ place.region }} | {{ place.desc }}</p>
             </div>
-            <button class="delete-btn">❌</button>
+            <button class="delete-btn" @click="courseStore.removeCourse(place.id)">❌</button>
           </div>
         </div>
 
-        <div class="course-actions">
-          <button class="action-btn share-btn">💻 과정 공유하기</button>
-          <button class="action-btn delete-all-btn">🗑️ 전체 초기화</button>
+        <div v-else style="padding: 40px 0; text-align: center; color: #94A3B8;">
+          아직 코스에 담긴 장소가 없습니다.<br>탐색 화면에서 가고 싶은 곳을 추가해 보세요!
+        </div>
+
+        <div class="course-actions" v-if="courseStore.totalCount > 0">
+          <button class="action-btn share-btn" @click="alert('코스 공유 기능은 준비 중입니다!')">💻 코스 공유하기</button>
+          <button class="action-btn delete-all-btn" @click="courseStore.clearCourse">🗑️ 전체 초기화</button>
         </div>
       </div>
 
@@ -30,8 +34,8 @@
         <h3 class="section-title">🗺️ 코스 요약</h3>
         <div class="preview-box">
           <div class="empty-state">
-            <p>총 3개의 장소가 코스에 담겨 있습니다.</p>
-            <p>총 예상 소요 시간: 약 4시간</p>
+            <p>총 <strong style="font-size: 24px; color:#0369A1;">{{ courseStore.totalCount }}</strong>개의 장소가</p>
+            <p>코스에 담겨 있습니다.</p>
           </div>
         </div>
       </div>
@@ -39,7 +43,13 @@
   </div>
 </template>
 
+<script setup>
+import { useCourseStore } from '../stores/courseStore';
+const courseStore = useCourseStore();
+</script>
+
 <style scoped>
+/* 기존 스타일 그대로 복붙! */
 .course-view {
   max-width: 1000px;
   margin: 0 auto;
@@ -68,7 +78,7 @@
   background-color: white;
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
 }
 
 .section-title {
@@ -87,7 +97,6 @@
   flex: 4;
 }
 
-/* 타임라인 스타일 */
 .timeline {
   position: relative;
   padding-left: 20px;
@@ -150,6 +159,11 @@
   cursor: pointer;
   margin-left: 10px;
   margin-top: 15px;
+  transition: 0.2s;
+}
+
+.delete-btn:hover {
+  transform: scale(1.2);
 }
 
 .course-actions {

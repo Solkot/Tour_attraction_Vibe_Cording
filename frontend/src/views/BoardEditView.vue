@@ -1,5 +1,5 @@
 <template>
-  <div class="edit-view">
+  <div class="edit-view" v-if="editPost">
     <div class="header">
       <h2>✏️ 게시글 수정하기</h2>
       <p>수정할 내용을 입력해 주세요.</p>
@@ -8,7 +8,7 @@
     <div class="form-container">
       <div class="form-group">
         <label>카테고리</label>
-        <select class="form-input" v-model="category">
+        <select class="form-input" v-model="editPost.category">
           <option value="관광지">🟢 관광지</option>
           <option value="음식점">🟡 음식점</option>
           <option value="숙소">🔵 숙소</option>
@@ -18,17 +18,16 @@
 
       <div class="form-group">
         <label>제목</label>
-        <input type="text" class="form-input" v-model="title" />
+        <input type="text" class="form-input" v-model="editPost.title" />
       </div>
 
       <div class="form-group">
         <label>내용</label>
-        <textarea class="form-input textarea" rows="10" v-model="content"></textarea>
+        <textarea class="form-input textarea" rows="10" v-model="editPost.content"></textarea>
       </div>
 
       <div class="button-group">
-        <!-- 취소 시 상세 화면으로 돌아감 -->
-        <button class="btn-cancel" @click="$router.push('/board/1')">취소</button>
+        <button class="btn-cancel" @click="$router.push(`/board/${route.params.id}`)">취소</button>
         <button class="btn-submit" @click="submitEdit">수정 완료</button>
       </div>
     </div>
@@ -36,16 +35,46 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useBoardStore } from '../stores/boardStore';
 
-// 임시 더미 데이터 (나중에는 백엔드에서 받아온 데이터를 넣습니다)
-const category = ref('관광지');
-const title = ref('금오산 둘레길 지금 단풍 상태 완전 절정이에요! 🍁');
-const content = ref('이번 주말에 금오산 다녀왔는데 단풍이 정말 예쁘게 물들었네요.\n가족들과 산책 다녀오기 딱 좋은 날씨입니다. 강추해요!');
+const route = useRoute();
+const router = useRouter();
+const boardStore = useBoardStore();
 
+const editPost = ref(null);
+
+// 화면 켜질 때 기존 데이터 불러와서 입력창에 채워넣기
+onMounted(() => {
+  const postId = route.params.id;
+  const originalPost = boardStore.getPostById(postId);
+  
+  if (originalPost) {
+    // 깊은 복사(Object.assign)를 해서 수정 중 취소해도 원본이 망가지지 않게 함
+    editPost.value = { ...originalPost };
+  } else {
+    alert('잘못된 접근입니다.');
+    router.push('/board');
+  }
+});
+
+// 수정 완료 버튼 눌렀을 때
 const submitEdit = () => {
-  // TODO: 백엔드 수정 API 연결
+  if (!editPost.value.title || !editPost.value.content) {
+    alert('제목과 내용을 모두 입력해 주세요!');
+    return;
+  }
+
+  // Pinia 저장소 업데이트 함수 호출
+  boardStore.updatePost(route.params.id, {
+    category: editPost.value.category,
+    title: editPost.value.title,
+    content: editPost.value.content
+  });
+  
   alert('수정이 완료되었습니다!');
+  router.push(`/board/${route.params.id}`); // 다시 상세보기 화면으로 이동
 };
 </script>
 

@@ -8,7 +8,7 @@
     <div class="form-container">
       <div class="form-group">
         <label>카테고리</label>
-        <select class="form-input">
+        <select class="form-input" v-model="newPost.category">
           <option value="관광지">🟢 관광지</option>
           <option value="음식점">🟡 음식점</option>
           <option value="숙소">🔵 숙소</option>
@@ -18,28 +18,66 @@
 
       <div class="form-group">
         <label>제목</label>
-        <input type="text" class="form-input" placeholder="게시글 제목을 입력하세요" />
+        <input type="text" class="form-input" v-model="newPost.title" placeholder="게시글 제목을 입력하세요" />
       </div>
 
-      <!-- 요구사항 '나': 수정용 비밀번호 입력 -->
       <div class="form-group">
         <label>수정용 비밀번호 (필수)</label>
-        <input type="password" class="form-input" placeholder="수정/삭제 시 사용할 비밀번호 (숫자 4자리 권장)" />
+        <input type="password" class="form-input" v-model="newPost.password" placeholder="수정/삭제 시 사용할 비밀번호 (숫자 4자리 권장)" />
         <small class="help-text">※ 비밀번호를 분실하면 글을 수정하거나 삭제할 수 없습니다.</small>
       </div>
 
       <div class="form-group">
         <label>내용</label>
-        <textarea class="form-input textarea" rows="10" placeholder="내용을 입력하세요"></textarea>
+        <textarea class="form-input textarea" rows="10" v-model="newPost.content" placeholder="내용을 입력하세요"></textarea>
       </div>
 
       <div class="button-group">
         <button class="btn-cancel" @click="$router.push('/board')">취소</button>
-        <button class="btn-submit">등록하기</button>
+        <button class="btn-submit" @click="submitPost">등록하기</button>
       </div>
     </div>
   </div>
 </template>
+
+<script setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useBoardStore } from '../stores/boardStore'
+
+const router = useRouter()
+const boardStore = useBoardStore()
+
+// 사용자가 입력할 폼 데이터 (양방향 바인딩 v-model)
+const newPost = ref({
+  category: '관광지',
+  title: '',
+  password: '',
+  content: ''
+})
+
+// 게시글 등록 함수
+const submitPost = () => {
+  // 1. 필수 입력값 검사
+  if (!newPost.value.title || !newPost.value.password || !newPost.value.content) {
+    alert('제목, 비밀번호, 내용을 모두 입력해 주세요!')
+    return
+  }
+  
+  // 2. Pinia 저장소의 addPost 함수 호출
+  boardStore.addPost({
+    category: newPost.value.category,
+    title: newPost.value.title,
+    password: newPost.value.password, // 교육용 평문 저장!
+    content: newPost.value.content
+  })
+  
+  alert('게시글이 성공적으로 등록되었습니다!')
+  
+  // 3. 등록 완료 후 목록 화면으로 이동
+  router.push('/board')
+}
+</script>
 
 <style scoped>
 .write-view {

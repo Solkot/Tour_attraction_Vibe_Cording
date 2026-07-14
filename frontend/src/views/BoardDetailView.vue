@@ -1,17 +1,16 @@
 <template>
-  <div class="detail-view">
+  <div class="detail-view" v-if="post">
     <div class="post-card">
       <div class="post-header">
-        <span class="category-badge">🟢 관광지</span>
-        <h2 class="title">금오산 둘레길 지금 단풍 상태 완전 절정이에요! 🍁</h2>
+        <span class="category-badge">{{ post.category }}</span>
+        <h2 class="title">{{ post.title }}</h2>
         <div class="meta-info">
-          <span>👤 익명작성자</span> | <span>2026.07.14 15:30</span> | <span>👀 조회 142</span>
+          <span>👤 {{ post.author }}</span> | <span>{{ post.date }}</span> | <span>👀 조회 {{ post.views }}</span>
         </div>
       </div>
 
       <div class="post-content">
-        이번 주말에 금오산 다녀왔는데 단풍이 정말 예쁘게 물들었네요.<br>
-        가족들과 산책 다녀오기 딱 좋은 날씨입니다. 강추해요!
+        <p v-html="post.content.replace(/\n/g, '<br>')"></p>
       </div>
 
       <div class="action-buttons">
@@ -23,7 +22,6 @@
       </div>
     </div>
 
-    <!-- 비밀번호 확인 모달 -->
     <div class="modal-overlay" v-if="showModal">
       <div class="password-modal">
         <h3>🔒 비밀번호 확인</h3>
@@ -36,39 +34,62 @@
       </div>
     </div>
   </div>
+  <div v-else style="text-align:center; padding:50px;">
+    <h2>존재하지 않는 게시글입니다.</h2>
+    <button @click="$router.push('/board')">목록으로 돌아가기</button>
+  </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useBoardStore } from '../stores/boardStore';
 
+const route = useRoute();
+const router = useRouter();
+const boardStore = useBoardStore();
+
+const post = ref(null);
 const showModal = ref(false);
 const modalAction = ref('');
 const inputPassword = ref('');
 
-// 모달 열기 함수
+// 화면이 켜질 때 주소창의 id 번호로 글 데이터 가져오기
+onMounted(() => {
+  const postId = route.params.id; // 주소창의 :id 값 추출
+  post.value = boardStore.getPostById(postId);
+  
+  if (post.value) {
+    post.value.views++; // 클릭했으니 조회수 1 증가 (보너스 기능!)
+  }
+});
+
 const openPasswordModal = (action) => {
   modalAction.value = action;
   inputPassword.value = '';
   showModal.value = true;
 };
 
-// 비밀번호 검증 및 페이지 이동 로직
+// 비밀번호 검증 및 수정/삭제 실행
 const verifyPassword = () => {
   if (!inputPassword.value) {
     alert("비밀번호를 입력해주세요.");
     return;
   }
   
-  // TODO: 실제로는 여기서 백엔드로 비밀번호를 보내서 검증해야 합니다.
-  // 지금은 화면 UI 흐름만 구성하기 위해 무조건 성공한다고 가정합니다.
+  // 가짜 DB의 비밀번호와 입력한 비밀번호 비교
+  if (inputPassword.value !== post.value.password) {
+    alert("비밀번호가 일치하지 않습니다!");
+    return;
+  }
   
+  // 비밀번호가 맞았을 때!
   if (modalAction.value === '수정') {
-    alert('비밀번호가 확인되었습니다. 수정 화면으로 이동합니다.');
-    // 라우터를 이용해 수정 화면(/board/edit/1)으로 강제 이동
-    window.location.href = '/board/edit/1'; 
+    router.push(`/board/edit/${post.value.id}`); // 수정 화면으로 이동
   } else if (modalAction.value === '삭제') {
+    boardStore.deletePost(post.value.id); // 저장소에서 삭제
     alert('게시글이 성공적으로 삭제되었습니다.');
-    window.location.href = '/board'; // 목록으로 이동
+    router.push('/board'); // 목록으로 이동
   }
   
   showModal.value = false;

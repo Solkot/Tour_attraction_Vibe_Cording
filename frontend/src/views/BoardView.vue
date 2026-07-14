@@ -20,32 +20,47 @@
     </div>
 
     <div class="post-list">
-      <div class="post-card" v-for="i in 4" :key="i" @click="$router.push('/board/1')">
+      <div 
+        class="post-card" 
+        v-for="post in boardStore.posts" 
+        :key="post.id" 
+        @click="$router.push(`/board/${post.id}`)"
+      >
         <div class="post-info">
-          <span class="post-no">No. {{ 5 - i }}</span>
-          <span class="post-category">🟢 관광지</span>
-          <h3 class="post-title">금오산 둘레길 지금 단풍 상태 완전 절정이에요! 🍁</h3>
+          <span class="post-no">No. {{ post.id }}</span>
+          <span class="post-category">{{ getCategoryIcon(post.category) }}</span>
+          <h3 class="post-title">{{ post.title }}</h3>
         </div>
         <div class="post-meta">
-          <span>👤 익명작성자</span>
+          <span>👤 {{ post.author }}</span>
           <span class="divider">|</span>
-          <span>💬 댓글 3</span>
-          <span class="divider">|</span>
-          <span>👀 조회 142</span>
+          <span>👀 조회 {{ post.views }}</span>
         </div>
-        <div class="post-date">2026.07.14</div>
+        <div class="post-date">{{ post.date }}</div>
       </div>
-    </div>
-
-    <div class="pagination">
-      <span>◀</span>
-      <span class="page-num active">1</span>
-      <span class="page-num">2</span>
-      <span class="page-num">3</span>
-      <span>▶</span>
+      
+      <div v-if="boardStore.posts.length === 0" style="text-align:center; padding: 40px; color:#64748B;">
+        등록된 게시글이 없습니다. 첫 글을 작성해 보세요!
+      </div>
     </div>
   </div>
 </template>
+
+<script setup>
+import { useBoardStore } from '../stores/boardStore'
+
+// Pinia 저장소 불러오기
+const boardStore = useBoardStore()
+
+// 카테고리 아이콘 변환 함수
+const getCategoryIcon = (category) => {
+  if (category === '관광지') return '🟢 관광지'
+  if (category === '음식점') return '🟡 음식점'
+  if (category === '숙소') return '🔵 숙소'
+  if (category === '쇼핑') return '🟣 쇼핑'
+  return category
+}
+</script>
 
 <style scoped>
 .board-view {
