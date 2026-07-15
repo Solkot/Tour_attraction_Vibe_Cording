@@ -1,0 +1,35 @@
+/* 1. 폰트 불러오기 (트렌디한 Pretendard) */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+/* 2. 전체 요소 초기화 */
+* {
+  box-sizing: border-box;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+/* 3. body 기본 여백 없애기 */
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #F8FAFC;
+  /* 아주 연한 파스텔톤 배경 베이스 */
+  color: #1E293B;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 4. 대망의 #app (화면 꽉 차게 제한 해제!) */
+#app {
+  width: 100%;
+  max-width: 2200px;
+  margin: 0 auto;
+  min-height: 100vh;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 링크 밑줄 제거 및 색상 초기화 */
+a {
+  text-decoration: none;
+  color: inherit;
+}
