@@ -5,7 +5,7 @@
         <span class="category-badge">{{ post.category }}</span>
         <h2 class="title">{{ post.title }}</h2>
         <div class="meta-info">
-          <span>👤 {{ post.author }}</span> | <span>{{ post.date }}</span> | <span>👀 조회 {{ post.views }}</span>
+          <span>👤 {{ post.author }}</span> | <span>{{ formatDate(post.created_at) }}</span> | <span>👀 조회 {{ post.views }}</span>
         </div>
       </div>
 
@@ -43,56 +43,83 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useBoardStore } from '../stores/boardStore';
+import axios from 'axios';
 
 const route = useRoute();
 const router = useRouter();
-const boardStore = useBoardStore();
 
 const post = ref(null);
 const showModal = ref(false);
 const modalAction = ref('');
 const inputPassword = ref('');
 
-// 화면이 켜질 때 주소창의 id 번호로 글 데이터 가져오기
-onMounted(() => {
-  const postId = route.params.id; // 주소창의 :id 값 추출
-  post.value = boardStore.getPostById(postId);
-  
-  if (post.value) {
-    post.value.views++; // 클릭했으니 조회수 1 증가 (보너스 기능!)
-  }
-});
+const BASE_URL = 'http://192.168.42.82:8000';
 
-const openPasswordModal = (action) => {
-  modalAction.value = action;
-  inputPassword.value = '';
-  showModal.value = true;
+// 상세 데이터 불러오기
+const fetchPostDetail = async () => {
+  try {
+    const postId = route.params.id; 
+    const response = await axios.get(`${BASE_URL}/api/posts/${postId}`);
+    post.value = response.data;
+  } catch (error) {
+    console.error("상세 정보 에러:", error);
+    alert("존재하지 않거나 삭제된 게시글입니다.");
+    router.push('/board'); // 에러 나면 목록으로 강제 복귀
+  }
 };
 
-// 비밀번호 검증 및 수정/삭제 실행
-const verifyPassword = () => {
+onMounted(() => {
+  fetchPostDetail();
+});
+
+// 백엔드 날짜 변환 함수
+const formatDate = (dateString) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleDateString() + ' ' + date.toLocaleTimeString().slice(0, 5);
+};
+
+const openPasswordModal = (action) => {
+  if (action === '수정') {
+    router.push(`/board/edit/${route.params.id}`); 
+  } else {
+    modalAction.value = action;
+    inputPassword.value = '';
+    showModal.value = true;
+  }
+};
+
+// 비밀번호 검증 및 삭제 실행 (DELETE)
+const verifyPassword = async () => {
   if (!inputPassword.value) {
     alert("비밀번호를 입력해주세요.");
     return;
   }
   
-  // 가짜 DB의 비밀번호와 입력한 비밀번호 비교
-  if (inputPassword.value !== post.value.password) {
-    alert("비밀번호가 일치하지 않습니다!");
-    return;
+  if (modalAction.value === '삭제') {
+    try {
+      const postId = route.params.id;
+      
+      // 💡 핵심: Swagger 명세에 따라 password를 query 파라미터로 보냅니다!
+      await axios.delete(`${BASE_URL}/api/posts/${postId}`, {
+        params: { password: inputPassword.value }
+      });
+      
+      alert('게시글이 성공적으로 지워졌습니다. 🧹');
+      showModal.value = false;
+      router.push('/board'); // 삭제 완료 후 게시판 목록으로 이동
+      
+    } catch (error) {
+      console.error("삭제 에러:", error);
+      
+      // 백엔드에서 비밀번호가 틀렸을 때 보통 400 에러를 내려줍니다.
+      if (error.response && error.response.status === 400) {
+        alert('비밀번호가 일치하지 않습니다! 🙅‍♂️');
+      } else {
+        alert('삭제에 실패했습니다. 비밀번호를 다시 확인해 주세요.');
+      }
+    }
   }
-  
-  // 비밀번호가 맞았을 때!
-  if (modalAction.value === '수정') {
-    router.push(`/board/edit/${post.value.id}`); // 수정 화면으로 이동
-  } else if (modalAction.value === '삭제') {
-    boardStore.deletePost(post.value.id); // 저장소에서 삭제
-    alert('게시글이 성공적으로 삭제되었습니다.');
-    router.push('/board'); // 목록으로 이동
-  }
-  
-  showModal.value = false;
 };
 </script>
 

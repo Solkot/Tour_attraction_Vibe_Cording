@@ -11,21 +11,40 @@
       </div>
     </div>
 
-    <div class="category-filters">
-      <button class="filter-btn active">전체</button>
-      <button class="filter-btn">🟢 관광지</button>
-      <button class="filter-btn">🟡 음식점</button>
-      <button class="filter-btn">🔵 숙소</button>
-      <button class="filter-btn">🟣 쇼핑</button>
-    </div>
+<div class="category-filters">
+  <button 
+    class="filter-btn" 
+    :class="{ active: activeCategory === '' }" 
+    @click="filterByCategory('')"
+  >전체</button>
+  
+  <button 
+    class="filter-btn" 
+    :class="{ active: activeCategory === '관광지' }" 
+    @click="filterByCategory('관광지')"
+  >🟢 관광지</button>
+  
+  <button 
+    class="filter-btn" 
+    :class="{ active: activeCategory === '음식점' }" 
+    @click="filterByCategory('음식점')"
+  >🟡 음식점</button>
+  
+  <button 
+    class="filter-btn" 
+    :class="{ active: activeCategory === '숙소' }" 
+    @click="filterByCategory('숙소')"
+  >🔵 숙소</button>
+  
+  <button 
+    class="filter-btn" 
+    :class="{ active: activeCategory === '쇼핑' }" 
+    @click="filterByCategory('쇼핑')"
+  >🟣 쇼핑</button>
+</div>
 
     <div class="post-list">
-      <div 
-        class="post-card" 
-        v-for="post in boardStore.posts" 
-        :key="post.id" 
-        @click="$router.push(`/board/${post.id}`)"
-      >
+      <div class="post-card" v-for="post in posts" :key="post.id" @click="$router.push(`/board/${post.id}`)">
         <div class="post-info">
           <span class="post-no">No. {{ post.id }}</span>
           <span class="post-category">{{ getCategoryIcon(post.category) }}</span>
@@ -36,10 +55,10 @@
           <span class="divider">|</span>
           <span>👀 조회 {{ post.views }}</span>
         </div>
-        <div class="post-date">{{ post.date }}</div>
+        <div class="post-date">{{ formatDate(post.created_at) }}</div>
       </div>
       
-      <div v-if="boardStore.posts.length === 0" style="text-align:center; padding: 40px; color:#64748B;">
+      <div v-if="posts.length === 0" style="text-align:center; padding: 40px; color:#64748B;">
         등록된 게시글이 없습니다. 첫 글을 작성해 보세요!
       </div>
     </div>
@@ -47,10 +66,45 @@
 </template>
 
 <script setup>
-import { useBoardStore } from '../stores/boardStore'
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
 
-// Pinia 저장소 불러오기
-const boardStore = useBoardStore()
+const posts = ref([])
+const activeCategory = ref('') // 현재 선택된 카테고리 (빈 문자열이면 전체)
+
+const BASE_URL = 'http://192.168.42.82:8000'
+
+// 백엔드에서 게시글 목록 가져오기
+const fetchPosts = async (category = '') => {
+  try {
+    // 카테고리가 선택되어 있으면 파라미터로 같이 보냅니다 (Swagger 명세 반영)
+    const params = category ? { category } : {}
+    const response = await axios.get(`${BASE_URL}/api/posts`, { params })
+    
+    // 받아온 데이터를 posts 배열에 덮어쓰기 (최신 글이 위로 오게 역순 정렬)
+    posts.value = response.data.reverse() 
+  } catch (error) {
+    console.error("목록을 불러오는 중 에러 발생:", error)
+  }
+}
+
+// 화면이 처음 켜질 때 전체 목록 불러오기
+onMounted(() => {
+  fetchPosts()
+})
+
+// 카테고리 버튼 클릭 시 실행할 함수
+const filterByCategory = (category) => {
+  activeCategory.value = category
+  fetchPosts(category)
+}
+
+// 백엔드 날짜(2026-07-15T...)를 예쁘게 변환하는 함수
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  return date.toLocaleDateString() // 예: 2026. 7. 15.
+}
 
 // 카테고리 아이콘 변환 함수
 const getCategoryIcon = (category) => {

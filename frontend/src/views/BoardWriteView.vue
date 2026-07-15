@@ -43,12 +43,11 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useBoardStore } from '../stores/boardStore'
+import axios from 'axios' // 👈 API 통신을 위한 axios 추가!
 
 const router = useRouter()
-const boardStore = useBoardStore()
 
-// 사용자가 입력할 폼 데이터 (양방향 바인딩 v-model)
+// 사용자가 입력할 폼 데이터
 const newPost = ref({
   category: '관광지',
   title: '',
@@ -56,26 +55,44 @@ const newPost = ref({
   content: ''
 })
 
-// 게시글 등록 함수
-const submitPost = () => {
+// 게시글 등록 함수 (async/await로 서버 통신 처리)
+const submitPost = async () => {
   // 1. 필수 입력값 검사
   if (!newPost.value.title || !newPost.value.password || !newPost.value.content) {
     alert('제목, 비밀번호, 내용을 모두 입력해 주세요!')
     return
   }
   
-  // 2. Pinia 저장소의 addPost 함수 호출
-  boardStore.addPost({
-    category: newPost.value.category,
-    title: newPost.value.title,
-    password: newPost.value.password, // 교육용 평문 저장!
-    content: newPost.value.content
-  })
-  
-  alert('게시글이 성공적으로 등록되었습니다!')
-  
-  // 3. 등록 완료 후 목록 화면으로 이동
-  router.push('/board')
+  try {
+    // 💡 아까 사용하셨던 백엔드 IP 주소로 맞췄습니다! (다르면 수정해주세요)
+    const BASE_URL = 'http://192.168.42.82:8000' 
+    
+    // 2. Swagger 명세서에 맞게 전송할 데이터(Payload) 포장
+    const payload = {
+      title: newPost.value.title,
+      content: newPost.value.content,
+      category: newPost.value.category,
+      password: newPost.value.password
+    }
+    
+    // 3. 백엔드로 POST 요청 쏘기!
+    const response = await axios.post(`${BASE_URL}/api/posts`, payload)
+    
+    console.log('✅ 글쓰기 성공! 서버 응답:', response.data)
+    alert('게시글이 성공적으로 등록되었습니다!')
+    
+    // 4. 등록 완료 후 목록 화면으로 이동
+    router.push('/board')
+    
+  } catch (error) {
+    console.error('❌ 글쓰기 에러 발생:', error)
+    // 에러 종류에 따라 알림창 띄우기
+    if (error.response && error.response.status === 422) {
+      alert('입력하신 데이터 형식이 맞지 않습니다. (Validation Error)')
+    } else {
+      alert('서버와 통신하는 중 문제가 발생했습니다.')
+    }
+  }
 }
 </script>
 
