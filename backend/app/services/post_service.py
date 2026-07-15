@@ -41,6 +41,14 @@ def get_post(db: Session, post_id: int):
     if not post:
         raise HTTPException(404, "게시글을 찾을 수 없습니다.")
 
+    # Increase view count
+    try:
+        post.views = (post.views or 0) + 1
+        db.commit()
+        db.refresh(post)
+    except Exception:
+        db.rollback()
+
     return post
 
 

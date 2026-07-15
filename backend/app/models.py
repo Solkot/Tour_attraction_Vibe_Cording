@@ -30,6 +30,7 @@ class Post(Base):
     category = Column(String, nullable=False)
     password = Column(String, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    views = Column(Integer, nullable=False, server_default="0")
     
     comments = relationship("Comment", back_populates="post", cascade="all, delete-orphan")
 

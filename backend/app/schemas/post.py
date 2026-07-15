@@ -7,6 +7,7 @@ class PostCreate(BaseModel):
     title: str
     content: str
     category: str
+
     password: str
 
 
@@ -26,6 +27,7 @@ class PostResponse(BaseModel):
     title: str
     content: str
     category: str
+    views: int
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
