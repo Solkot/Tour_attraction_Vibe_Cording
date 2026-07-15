@@ -43,7 +43,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from 'axios' // 👈 API 통신을 위한 axios 추가!
+import axios from 'axios'
 
 const router = useRouter()
 
@@ -64,10 +64,8 @@ const submitPost = async () => {
   }
   
   try {
-    // 💡 아까 사용하셨던 백엔드 IP 주소로 맞췄습니다! (다르면 수정해주세요)
     const BASE_URL = 'http://192.168.42.82:8000' 
     
-    // 2. Swagger 명세서에 맞게 전송할 데이터(Payload) 포장
     const payload = {
       title: newPost.value.title,
       content: newPost.value.content,
@@ -75,13 +73,11 @@ const submitPost = async () => {
       password: newPost.value.password
     }
     
-    // 3. 백엔드로 POST 요청 쏘기!
     const response = await axios.post(`${BASE_URL}/api/posts`, payload)
     
     console.log('✅ 글쓰기 성공! 서버 응답:', response.data)
     alert('게시글이 성공적으로 등록되었습니다!')
     
-    // 4. 등록 완료 후 목록 화면으로 이동
     router.push('/board')
     
   } catch (error) {

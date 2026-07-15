@@ -11,37 +11,21 @@
       </div>
     </div>
 
-<div class="category-filters">
-  <button 
-    class="filter-btn" 
-    :class="{ active: activeCategory === '' }" 
-    @click="filterByCategory('')"
-  >전체</button>
-  
-  <button 
-    class="filter-btn" 
-    :class="{ active: activeCategory === '관광지' }" 
-    @click="filterByCategory('관광지')"
-  >🟢 관광지</button>
-  
-  <button 
-    class="filter-btn" 
-    :class="{ active: activeCategory === '음식점' }" 
-    @click="filterByCategory('음식점')"
-  >🟡 음식점</button>
-  
-  <button 
-    class="filter-btn" 
-    :class="{ active: activeCategory === '숙소' }" 
-    @click="filterByCategory('숙소')"
-  >🔵 숙소</button>
-  
-  <button 
-    class="filter-btn" 
-    :class="{ active: activeCategory === '쇼핑' }" 
-    @click="filterByCategory('쇼핑')"
-  >🟣 쇼핑</button>
-</div>
+    <div class="category-filters">
+      <button class="filter-btn" :class="{ active: activeCategory === '' }" @click="filterByCategory('')">전체</button>
+
+      <button class="filter-btn" :class="{ active: activeCategory === '관광지' }" @click="filterByCategory('관광지')">🟢
+        관광지</button>
+
+      <button class="filter-btn" :class="{ active: activeCategory === '음식점' }" @click="filterByCategory('음식점')">🟡
+        음식점</button>
+
+      <button class="filter-btn" :class="{ active: activeCategory === '숙소' }" @click="filterByCategory('숙소')">🔵
+        숙소</button>
+
+      <button class="filter-btn" :class="{ active: activeCategory === '쇼핑' }" @click="filterByCategory('쇼핑')">🟣
+        쇼핑</button>
+    </div>
 
     <div class="post-list">
       <div class="post-card" v-for="post in posts" :key="post.id" @click="$router.push(`/board/${post.id}`)">
@@ -57,7 +41,7 @@
         </div>
         <div class="post-date">{{ formatDate(post.created_at) }}</div>
       </div>
-      
+
       <div v-if="posts.length === 0" style="text-align:center; padding: 40px; color:#64748B;">
         등록된 게시글이 없습니다. 첫 글을 작성해 보세요!
       </div>
@@ -80,9 +64,9 @@ const fetchPosts = async (category = '') => {
     // 카테고리가 선택되어 있으면 파라미터로 같이 보냅니다 (Swagger 명세 반영)
     const params = category ? { category } : {}
     const response = await axios.get(`${BASE_URL}/api/posts`, { params })
-    
+
     // 받아온 데이터를 posts 배열에 덮어쓰기 (최신 글이 위로 오게 역순 정렬)
-    posts.value = response.data.reverse() 
+    posts.value = response.data.reverse()
   } catch (error) {
     console.error("목록을 불러오는 중 에러 발생:", error)
   }
@@ -181,7 +165,7 @@ const getCategoryIcon = (category) => {
   background-color: white;
   color: #1E293B;
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .filter-btn.active {
@@ -195,7 +179,7 @@ const getCategoryIcon = (category) => {
   padding: 20px;
   border-radius: 12px;
   margin-bottom: 15px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
   display: flex;
   flex-direction: column;
   position: relative;
@@ -205,7 +189,7 @@ const getCategoryIcon = (category) => {
 .post-card:hover {
   transform: translateY(-2px);
   transition: 0.2s;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .post-info {
