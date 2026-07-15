@@ -51,7 +51,7 @@ const courseStore = useCourseStore();
 <style scoped>
 /* 기존 스타일 그대로 복붙! */
 .course-view {
-  max-width: 1000px;
+  max-width: 1600px;
   margin: 0 auto;
 }
 

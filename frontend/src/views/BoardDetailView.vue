@@ -39,7 +39,7 @@
 
           <div v-else class="comment-item" v-for="comment in comments" :key="comment.id">
             <div class="comment-info">
-              <span class="comment-author">👤 {{ comment.author }}</span>
+              <span class="comment-author">🐰 {{ comment.author }}</span>
               <span class="comment-date">{{ formatDate(comment.created_at) }}</span>
             </div>
             <div class="comment-content">{{ comment.content }}</div>
@@ -84,7 +84,7 @@ const newCommentContent = ref('');
 const newCommentPassword = ref('');
 const comments = ref([]);
 
-const BASE_URL = 'http://192.168.42.82:8000';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // 상세 데이터 불러오기
 const fetchPostDetail = async () => {
@@ -132,12 +132,10 @@ const verifyPassword = async () => {
     try {
       const postId = route.params.id;
 
-      // 💡 핵심: Swagger 명세에 따라 password를 query 파라미터로 보냅니다!
       await axios.delete(`${BASE_URL}/api/posts/${postId}`, {
         params: { password: inputPassword.value }
       });
 
-      alert('게시글이 성공적으로 지워졌습니다. 🧹');
       showModal.value = false;
       router.push('/board'); // 삭제 완료 후 게시판 목록으로 이동
 

@@ -7,7 +7,7 @@
         <router-link to="/board" class="nav-item">익명 게시판</router-link>
         <router-link to="/course" class="nav-item">마이 코스</router-link>
       </nav>
-      <div class="profile-icon">👤</div>
+      <div class="profile-icon">🐰</div>
     </header>
 
     <main class="main-content">
@@ -56,11 +56,18 @@ const toggleChat = () => {
 </script>
 
 <style scoped>
-/* 기존 GNB 스타일 */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+* {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+}
+
 .app-container {
-  min-height: 100vh;
+  width: 100%;
+  max-width: 2200px;
+  margin: 0 auto;
+  padding: 20px;
   background-color: #F0F8FF;
-  font-family: 'sans-serif';
 }
 
 .gnb {

@@ -9,10 +9,10 @@
       <div class="form-group">
         <label>카테고리</label>
         <select class="form-input" v-model="newPost.category">
-          <option value="관광지">🟢 관광지</option>
-          <option value="음식점">🟡 음식점</option>
-          <option value="숙소">🔵 숙소</option>
-          <option value="쇼핑">🟣 쇼핑</option>
+          <option value="관광지">🏛️ 관광지</option>
+          <option value="음식점">🍽️ 음식점</option>
+          <option value="숙소">⛺ 숙소</option>
+          <option value="쇼핑">🛒 쇼핑</option>
         </select>
       </div>
 
@@ -64,7 +64,7 @@ const submitPost = async () => {
   }
   
   try {
-    const BASE_URL = 'http://192.168.42.82:8000' 
+    const BASE_URL = import.meta.env.VITE_API_BASE_URL;
     
     const payload = {
       title: newPost.value.title,
