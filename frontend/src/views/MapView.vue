@@ -15,7 +15,7 @@
         <h3>📍 {{ selectedRegion }} 근처 인접 지역</h3>
         <div class="tags-container">
           <span class="region-tag center-tag">{{ selectedRegion }} (중심)</span>
-          <span class="region-tag adjacent-tag" v-for="adj in adjacentRegions" :key="adj">
+          <span class="region-tag adjacent-tag" v-for="adj in adjacentRegions" :key="adj" @click="changeCenterRegion(adj)">
             {{ adj }}
           </span>
         </div>
@@ -121,6 +121,18 @@ const fetchPlaces = async () => {
   }
 };
 
+// 인접 지역 태그 클릭 시 중심 지역을 바꿔주는 함수
+const changeCenterRegion = (newRegion) => {
+  // 우리가 만든 regionData(드롭다운 목록)에 해당 동네가 키값으로 존재하는지 확인
+  if (regionData[newRegion]) {
+    selectedRegion.value = newRegion; 
+    // 값이 바뀌면 알아서 watch가 감지해서 fetchPlaces()를 다시 실행해줍니다!
+  } else {
+    // 만약 데이터가 없는 동네라면 (예: 남통동, 신평동 등을 key로 추가 안 했을 경우)
+    alert(`${newRegion} 데이터는 아직 준비 중입니다! 😅 (추후 업데이트 예정)`);
+  }
+};
+
 // 4. 사용자가 드롭다운에서 지역을 선택할 때마다 자동으로 fetchPlaces 실행
 watch(selectedRegion, () => {
   fetchPlaces();
@@ -201,6 +213,14 @@ const getCategoryClass = (category) => {
   background-color: #E0F2FE;
   color: #0369A1;
   border: 1px solid #78C2F3;
+  cursor: pointer; /* 👈 마우스 올리면 손가락 모양으로 바뀜 */
+  transition: all 0.2s ease; /* 👈 부드러운 애니메이션 효과 */
+}
+
+/* 👈 마우스를 올렸을 때 배경색과 글자색이 반전되는 효과 추가 */
+.adjacent-tag:hover {
+  background-color: #78C2F3;
+  color: white;
 }
 
 .placeholder {
