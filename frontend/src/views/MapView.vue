@@ -15,7 +15,7 @@
         <h3>📍 {{ selectedRegion }} 근처 인접 지역</h3>
         <div class="tags-container">
           <span class="region-tag center-tag">{{ selectedRegion }} (중심)</span>
-          <span class="region-tag adjacent-tag" v-for="adj in adjacentRegions" :key="adj">
+          <span class="region-tag adjacent-tag" v-for="adj in adjacentRegions" :key="adj" @click="changeCenterRegion(adj)">
             {{ adj }}
           </span>
         </div>
@@ -29,14 +29,14 @@
       <h3 class="sidebar-title">📍 탐색 결과</h3>
 
       <div v-if="selectedRegion" class="list-container">
-        <p class="result-count">총 <strong>{{ filteredPlaces.length }}</strong>개의 장소를 찾았어요!</p>
+        <p class="result-count">총 <strong>{{ placeList.length }}</strong>개의 장소를 찾았어요!</p>
 
         <button class="add-course-btn" @click="courseStore.addCourse(place)">
           📌 내 코스에 추가
         </button>
 
         <div class="place-list">
-          <div class="place-card" v-for="place in filteredPlaces" :key="place.id">
+          <div class="place-card" v-for="place in placeList" :key="place.id">
             <div class="place-header">
               <span class="badge" :class="getCategoryClass(place.category)">{{ place.category }}</span>
               <span class="region-label">🚩 {{ place.region }}</span>
@@ -47,7 +47,7 @@
           </div>
         </div>
 
-        <div v-if="filteredPlaces.length === 0" class="empty-result">
+        <div v-if="placeList.length === 0" class="empty-result">
           <p>이 주변에는 아직 등록된 장소가 없네요 🥲</p>
         </div>
       </div>
@@ -60,50 +60,85 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch} from 'vue';
 import { useCourseStore } from '../stores/courseStore';
+import axios from 'axios';
 
 const courseStore = useCourseStore();
 
 // 1. 구미시 주요 행정구역 및 인접 지역 데이터
 const regionData = {
-  '원평동': ['송정동', '도량동', '지산동', '신평동'],
-  '송정동': ['원평동', '형곡동', '광평동'],
-  '도량동': ['원평동', '봉곡동', '선기동'],
-  '형곡동': ['송정동', '사곡동', '임은동']
+  // --- 강서 지역  ---
+  '원평동': ['송정동', '도량동', '지산동', '신평동', '남통동'],
+  '송정동': ['원평동', '형곡동', '광평동', '신평동'],
+  '도량동': ['원평동', '봉곡동', '선기동', '지산동'],
+  '형곡동': ['송정동', '사곡동', '상모동', '남통동'],
+  
+  // --- 강동 지역 --
+  '진평동': ['인의동', '구평동', '황상동', '임수동'],
+  '인의동': ['진평동', '황상동', '구평동'],
+  '구평동': ['진평동', '인의동', '신동'],
+  '옥계동': ['산동읍', '거의동', '구포동'],
+  '산동읍': ['옥계동', '해평면', '장천면'] // 확장 단지 포함
 };
+
 const regions = Object.keys(regionData).map(name => ({ name }));
 
 const selectedRegion = ref('');
-
-// 선택된 지역의 인접 지역 계산
 const adjacentRegions = computed(() => {
   if (!selectedRegion.value) return [];
   return regionData[selectedRegion.value] || [];
 });
 
-// 2. 가짜 장소 데이터 (★나중에 백엔드 API가 완성되면 이 배열을 갈아끼우면 됩니다!)
-const allPlaces = [
-  { id: 1, name: '원평동 문화의 거리', category: '관광지', region: '원평동', desc: '다양한 볼거리와 먹거리가 가득한 구미의 중심 거리.' },
-  { id: 2, name: '송정동 복개천 맛집골목', category: '음식점', region: '송정동', desc: '구미 현지인들이 사랑하는 맛집이 모여있는 곳.' },
-  { id: 3, name: '형곡 전망대', category: '관광지', region: '형곡동', desc: '구미 시내를 한눈에 내려다볼 수 있는 멋진 야경 명소.' },
-  { id: 4, name: '도량동 빵집', category: '음식점', region: '도량동', desc: '갓 구운 빵 냄새가 가득한 동네 숨은 빵 맛집.' },
-  { id: 5, name: '원평 중앙시장', category: '쇼핑', region: '원평동', desc: '정겨운 인심과 맛있는 길거리 음식이 있는 전통시장.' },
-  { id: 6, name: '지산동 샛강 생태공원', category: '관광지', region: '지산동', desc: '산책하기 좋은 조용한 생태공원. 고니 서식지.' }
-];
+const placeList = ref([]);
 
-// 3. 핵심 로직: 선택한 지역 + 인접 지역에 포함되는 장소만 걸러내기
-const filteredPlaces = computed(() => {
-  if (!selectedRegion.value) return [];
+// 3. API 호출 함수 (선택한 지역 + 인접 지역 데이터 모두 가져오기)
+const fetchPlaces = async () => {
+  if (!selectedRegion.value) return;
 
-  // 검색 대상이 될 지역 목록 생성 (예: ['원평동', '송정동', '도량동', '지산동', '신평동'])
-  const targetRegions = [selectedRegion.value, ...adjacentRegions.value];
+  try {
+    // 검색할 타겟 지역 목록 
+    const targetRegions = [selectedRegion.value, ...adjacentRegions.value];
+    
+    // 각 지역마다 백엔드에 요청을 보내는 준비 
+    const BASE_URL = 'http://192.168.42.82:8000';
+    
+    const requests = targetRegions.map(regionName => 
+      axios.get(`${BASE_URL}/api/places`, { 
+        params: { region: regionName } 
+      })
+    );
 
-  // 전체 장소 중, region이 targetRegions 안에 속해있는 장소만 반환
-  return allPlaces.filter(place => targetRegions.includes(place.region));
+    const responses = await Promise.all(requests);
+    
+    placeList.value = responses.flatMap(res => res.data);
+    
+    console.log("데이터 받아오기 성공!", placeList.value);
+
+  } catch (error) {
+    console.error("API 호출 중 에러 발생:", error);
+    alert("서버에서 장소 정보를 불러오는데 실패했습니다.");
+  }
+};
+
+// 인접 지역 태그 클릭 시 중심 지역을 바꿔주는 함수
+const changeCenterRegion = (newRegion) => {
+  // 우리가 만든 regionData(드롭다운 목록)에 해당 동네가 키값으로 존재하는지 확인
+  if (regionData[newRegion]) {
+    selectedRegion.value = newRegion; 
+    // 값이 바뀌면 알아서 watch가 감지해서 fetchPlaces()를 다시 실행해줍니다!
+  } else {
+    // 만약 데이터가 없는 동네라면 (예: 남통동, 신평동 등을 key로 추가 안 했을 경우)
+    alert(`${newRegion} 데이터는 아직 준비 중입니다! 😅 (추후 업데이트 예정)`);
+  }
+};
+
+// 4. 사용자가 드롭다운에서 지역을 선택할 때마다 자동으로 fetchPlaces 실행
+watch(selectedRegion, () => {
+  fetchPlaces();
 });
 
-// 카테고리에 맞춰 색상 클래스를 뱉어주는 함수
+// 카테고리 색상 클래스 (기존 유지)
 const getCategoryClass = (category) => {
   if (category === '관광지') return 'category-tour';
   if (category === '음식점') return 'category-food';
@@ -178,6 +213,14 @@ const getCategoryClass = (category) => {
   background-color: #E0F2FE;
   color: #0369A1;
   border: 1px solid #78C2F3;
+  cursor: pointer; /* 👈 마우스 올리면 손가락 모양으로 바뀜 */
+  transition: all 0.2s ease; /* 👈 부드러운 애니메이션 효과 */
+}
+
+/* 👈 마우스를 올렸을 때 배경색과 글자색이 반전되는 효과 추가 */
+.adjacent-tag:hover {
+  background-color: #78C2F3;
+  color: white;
 }
 
 .placeholder {
