@@ -100,108 +100,53 @@ def build_prompt(
 """.strip()
 
 
-# def call_openai(prompt: str) -> str:
-#     """
-#     OpenAI Responses API를 호출하여 답변을 생성한다.
-#     """
-
-#     api_key = require_environment_variable(
-#         "OPENAI_API_KEY"
-#     )
-
-#     model_name = os.getenv(
-#         "OPENAI_MODEL",
-#         "gpt-5-mini",
-#     ).strip()
-
-#     if not model_name:
-#         raise AIConfigurationError(
-#             "OPENAI_MODEL 환경변수를 설정해야 합니다."
-#         )
-
-#     try:
-#         from openai import OpenAI, OpenAIError
-
-#     except ImportError as exc:
-#         raise AIConfigurationError(
-#             "openai 패키지가 설치되어 있지 않습니다. "
-#             "'pip install openai'를 실행해 주세요."
-#         ) from exc
-
-#     try:
-#         client = OpenAI(
-#             api_key=api_key,
-#             timeout=30.0,
-#             max_retries=2,
-#         )
-
-#         response = client.responses.create(
-#             model=model_name,
-#             instructions=SYSTEM_INSTRUCTIONS,
-#             input=prompt,
-#             max_output_tokens=700,
-#         )
-
-#         answer = response.output_text
-
-#         if not answer or not answer.strip():
-#             raise AIServiceError(
-#                 "OpenAI가 비어 있는 응답을 반환했습니다."
-#             )
-
-#         return answer.strip()
-
-#     except AIServiceError:
-#         raise
-
-#     except OpenAIError as exc:
-#         raise AIServiceError(
-#             f"OpenAI API 호출에 실패했습니다: {exc}"
-#         ) from exc
-
-#     except Exception as exc:
-#         raise AIServiceError(
-#             "AI 답변을 생성하는 중 예상하지 못한 "
-#             "오류가 발생했습니다."
-#         ) from exc
-
-def call_gemini(prompt: str) -> str:
+def call_openai(prompt: str) -> str:
     """
-    Gemini API를 호출하여 답변을 생성한다.
+    OpenAI Responses API를 호출하여 답변을 생성한다.
     """
 
     api_key = require_environment_variable(
-        "GEMINI_API_KEY"
+        "OPENAI_API_KEY"
     )
 
-    model_name = require_environment_variable(
-        "GEMINI_MODEL"
-    )
+    model_name = os.getenv(
+        "OPENAI_MODEL",
+        "gpt-5-mini",
+    ).strip()
+
+    if not model_name:
+        raise AIConfigurationError(
+            "OPENAI_MODEL 환경변수를 설정해야 합니다."
+        )
 
     try:
-        import google.generativeai as genai
+        from openai import OpenAI, OpenAIError
 
     except ImportError as exc:
         raise AIConfigurationError(
-            "google-generativeai 패키지가 설치되어 있지 않습니다. "
-            "'pip install google-generativeai'를 실행해 주세요."
+            "openai 패키지가 설치되어 있지 않습니다. "
+            "'pip install openai'를 실행해 주세요."
         ) from exc
 
     try:
-        genai.configure(api_key=api_key)
-
-        model = genai.GenerativeModel(
-            model_name=model_name,
-            system_instruction=SYSTEM_INSTRUCTIONS,
+        client = OpenAI(
+            api_key=api_key,
+            timeout=30.0,
+            max_retries=2,
         )
 
-        response = model.generate_content(prompt)
+        response = client.responses.create(
+            model=model_name,
+            instructions=SYSTEM_INSTRUCTIONS,
+            input=prompt,
+            max_output_tokens=700,
+        )
 
-        answer = getattr(response, "text", None)
+        answer = response.output_text
 
         if not answer or not answer.strip():
             raise AIServiceError(
-                "Gemini가 비어 있는 응답을 반환했습니다."
+                "OpenAI가 비어 있는 응답을 반환했습니다."
             )
 
         return answer.strip()
@@ -209,10 +154,65 @@ def call_gemini(prompt: str) -> str:
     except AIServiceError:
         raise
 
+    except OpenAIError as exc:
+        raise AIServiceError(
+            f"OpenAI API 호출에 실패했습니다: {exc}"
+        ) from exc
+
     except Exception as exc:
         raise AIServiceError(
-            "Gemini API 호출에 실패했습니다."
+            "AI 답변을 생성하는 중 예상하지 못한 "
+            "오류가 발생했습니다."
         ) from exc
+
+# def call_gemini(prompt: str) -> str:
+#     """
+#     Gemini API를 호출하여 답변을 생성한다.
+#     """
+
+#     api_key = require_environment_variable(
+#         "GEMINI_API_KEY"
+#     )
+
+#     model_name = require_environment_variable(
+#         "GEMINI_MODEL"
+#     )
+
+#     try:
+#         import google.generativeai as genai
+
+#     except ImportError as exc:
+#         raise AIConfigurationError(
+#             "google-generativeai 패키지가 설치되어 있지 않습니다. "
+#             "'pip install google-generativeai'를 실행해 주세요."
+#         ) from exc
+
+#     try:
+#         genai.configure(api_key=api_key)
+
+#         model = genai.GenerativeModel(
+#             model_name=model_name,
+#             system_instruction=SYSTEM_INSTRUCTIONS,
+#         )
+
+#         response = model.generate_content(prompt)
+
+#         answer = getattr(response, "text", None)
+
+#         if not answer or not answer.strip():
+#             raise AIServiceError(
+#                 "Gemini가 비어 있는 응답을 반환했습니다."
+#             )
+
+#         return answer.strip()
+
+#     except AIServiceError:
+#         raise
+
+#     except Exception as exc:
+#         raise AIServiceError(
+#             "Gemini API 호출에 실패했습니다."
+#         ) from exc
 
 def require_environment_variable(
     variable_name: str,
