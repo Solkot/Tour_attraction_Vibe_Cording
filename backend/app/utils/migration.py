@@ -26,7 +26,7 @@ def seed_data():
     
     # 이미 데이터가 있는지 확인 (전체 테이블 기준)
     if db.query(TourLocation).first():
-        print("ℹ️ 이미 데이터가 DB에 존재합니다. 세딩을 건너뜁니다.")
+        print("이미 데이터가 DB에 존재합니다. 세딩을 건너뜁니다.")
         db.close()
         return
 
@@ -36,10 +36,10 @@ def seed_data():
         json_path = os.path.join(data_dir, filename)
         
         if not os.path.exists(json_path):
-            print(f"⚠️ 경고: {filename} 파일을 찾을 수 없습니다. 건너뜁니다.")
+            print(f"경고: {filename} 파일을 찾을 수 없습니다. 건너뜁니다.")
             continue
             
-        print(f"📦 {filename} 파싱 중...")
+        print(f"{filename} 파싱 중...")
         
         with open(json_path, "r", encoding="utf-8") as f:
             raw_data = json.load(f)
@@ -76,10 +76,10 @@ def seed_data():
 
     try:
         db.commit()
-        print(f"\n🎉 총 {total_loaded}건의 데이터를 SQLite DB에 적재 완료했습니다!")
+        print(f"\n총 {total_loaded}건의 데이터를 SQLite DB에 적재 완료했습니다!")
     except Exception as e:
         db.rollback()
-        print(f"❌ DB 적재 실패: {e}")
+        print(f"DB 적재 실패: {e}")
     finally:
         db.close()
 
