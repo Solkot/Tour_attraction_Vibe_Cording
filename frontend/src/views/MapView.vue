@@ -117,7 +117,7 @@ const fetchPlaces = async () => {
       ...adjacentRegions.value,
     ];
 
-    const BASE_URL = 'http://192.168.42.82:8000';
+    const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
     const requests = targetRegions.map((regionName) =>
       axios.get(`${BASE_URL}/api/places`, {

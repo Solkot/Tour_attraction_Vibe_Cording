@@ -56,7 +56,7 @@ import axios from 'axios'
 const posts = ref([])
 const activeCategory = ref('') // 현재 선택된 카테고리 (빈 문자열이면 전체)
 
-const BASE_URL = 'http://192.168.42.82:8000'
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // 백엔드에서 게시글 목록 가져오기
 const fetchPosts = async (category = '') => {

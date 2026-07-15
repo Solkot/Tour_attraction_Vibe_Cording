@@ -84,7 +84,7 @@ const newCommentContent = ref('');
 const newCommentPassword = ref('');
 const comments = ref([]);
 
-const BASE_URL = 'http://192.168.42.82:8000';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // 상세 데이터 불러오기
 const fetchPostDetail = async () => {

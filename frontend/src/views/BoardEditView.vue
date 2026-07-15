@@ -46,7 +46,7 @@ import axios from 'axios';
 
 const route = useRoute();
 const router = useRouter();
-const BASE_URL = 'http://192.168.42.82:8000';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // 수정할 데이터를 담을 변수 (비밀번호 포함)
 const editPost = ref({
