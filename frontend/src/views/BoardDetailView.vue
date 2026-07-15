@@ -39,7 +39,7 @@
 
           <div v-else class="comment-item" v-for="comment in comments" :key="comment.id">
             <div class="comment-info">
-              <span class="comment-author">👤 {{ comment.author }}</span>
+              <span class="comment-author">🐰 {{ comment.author }}</span>
               <span class="comment-date">{{ formatDate(comment.created_at) }}</span>
             </div>
             <div class="comment-content">{{ comment.content }}</div>
@@ -132,12 +132,10 @@ const verifyPassword = async () => {
     try {
       const postId = route.params.id;
 
-      // 💡 핵심: Swagger 명세에 따라 password를 query 파라미터로 보냅니다!
       await axios.delete(`${BASE_URL}/api/posts/${postId}`, {
         params: { password: inputPassword.value }
       });
 
-      alert('게시글이 성공적으로 지워졌습니다. 🧹');
       showModal.value = false;
       router.push('/board'); // 삭제 완료 후 게시판 목록으로 이동
 
