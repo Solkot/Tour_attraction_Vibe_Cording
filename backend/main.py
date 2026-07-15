@@ -11,10 +11,16 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # 모든 도메인 허용 (개발용)
+    allow_origins=["http://localhost:5173"], # 모든 도메인 허용 (개발용)
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(chat_router)
+
+@app.get("/")
+def read_root():
+    return {"message": "서버가 정상적으로 작동 중입니다."}
 
 def init_db():
     # 1. 모든 테이블 생성
