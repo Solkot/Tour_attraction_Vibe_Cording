@@ -87,6 +87,7 @@ const toggleChat = () => {
   isChatOpen.value = !isChatOpen.value;
 };
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 // 서버와 통신하는 함수
 const sendMessage = async () => {
   if (!userQuery.value.trim()) return;
@@ -97,7 +98,7 @@ const sendMessage = async () => {
   loading.value = true;
 
   try {
-    const response = await fetch('VITE_API_BASE_URL', {
+    const response = await fetch('BASE_URL', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
