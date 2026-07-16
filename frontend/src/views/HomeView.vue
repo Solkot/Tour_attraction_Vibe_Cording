@@ -34,13 +34,13 @@
       <div class="feature-card" @click="$router.push('/map')">
         <div class="feature-icon">📍</div>
         <h3>스마트 지도 탐색</h3>
-        <p>카카오맵 기반으로 구미시 구석구석의 명소와 맛집을 한눈에 찾아보세요.</p>
+        <p>카카오맵 기반으로 구미시 구석구석의<br/>명소와 맛집을 한눈에 찾아보세요.</p>
       </div>
       
       <div class="feature-card" @click="$router.push('/course')">
         <div class="feature-icon">🛤️</div>
         <h3>나만의 코스 설계</h3>
-        <p>가고 싶은 곳을 담아 나만의 동선을 만들고, 지도 위에서 한눈에 확인하세요.</p>
+        <p>가고 싶은 곳을 담아 나만의 동선을 만들고,<br/> 지도 위에서 한눈에 확인하세요.</p>
       </div>
       
       <div class="feature-card" @click="$router.push('/board')">
