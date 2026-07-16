@@ -98,7 +98,7 @@ const sendMessage = async () => {
   loading.value = true;
 
   try {
-    const response = await fetch(BASE_URL, {
+    const response = await fetch(`${BASE_URL}/api/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
