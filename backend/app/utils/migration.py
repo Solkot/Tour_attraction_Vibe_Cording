@@ -51,6 +51,8 @@ def seed_data():
             content_id = item.get("contentid")
             if not content_id:
                 continue
+            if item.get("addr1") and item.get("addr1").startswith("대구"):
+                continue
             
             # mapx, mapy 실수 변환
             mapx_val = item.get("mapx")
