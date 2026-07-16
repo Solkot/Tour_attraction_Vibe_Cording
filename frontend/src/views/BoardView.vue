@@ -35,7 +35,7 @@
           <h3 class="post-title">{{ post.title }}</h3>
         </div>
         <div class="post-meta">
-          <span>🐰 {{ post.author }}</span>
+          <span>{{ getAuthorEmoji(post.id) }} {{ post.author }}</span>
           <span class="divider">|</span>
           <span>조회수 {{ post.views }}</span>
         </div>
@@ -61,15 +61,23 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 // 백엔드에서 게시글 목록 가져오기
 const fetchPosts = async (category = '') => {
   try {
-    // 카테고리가 선택되어 있으면 파라미터로 같이 보냅니다 (Swagger 명세 반영)
     const params = category ? { category } : {}
     const response = await axios.get(`${BASE_URL}/api/posts`, { params })
 
-    // 받아온 데이터를 posts 배열에 덮어쓰기 (최신 글이 위로 오게 역순 정렬)
-    posts.value = response.data.reverse()
+    // 🌟 reverse() 대신 확실하게 id 기준으로 내림차순(최신순) 정렬!
+    posts.value = response.data.sort((a, b) => b.id - a.id)
   } catch (error) {
     console.error("목록을 불러오는 중 에러 발생:", error)
   }
+}
+
+// 🌟 귀여운 동물 이모티콘 리스트 (원하는 동물로 맘껏 추가하세요!)
+const emoticons = ['🐰', '🦊', '🐻', '🐼', '🐯', '🦁', '🐨', '🐸', '🐹', '🐭', '🐱', '🐶', '🦄', '🦦', '🦥']
+
+// 🌟 게시글 번호(id)를 나눠서 항상 동일한 랜덤 이모티콘이 나오도록 하는 마법의 함수!
+const getAuthorEmoji = (id) => {
+  if (!id) return '👤' // id가 없을 경우 기본값
+  return emoticons[id % emoticons.length] // 리스트 길이에 맞춰서 돌아가며 배정됩니다.
 }
 
 // 화면이 처음 켜질 때 전체 목록 불러오기
@@ -115,22 +123,26 @@ const getCategoryIcon = (category) => {
   justify-content: space-between;
   align-items: flex-end;
   margin-bottom: 30px;
-  flex-wrap: wrap; /* 모바일에서 좁아지면 아래로 떨어지게 */
+  flex-wrap: wrap;
+  /* 모바일에서 좁아지면 아래로 떨어지게 */
   gap: 15px;
 }
 
 .title-area h2 {
-  color: #0369A1; /* 더 쨍하고 예쁜 파란색 */
+  color: #0369A1;
+  /* 더 쨍하고 예쁜 파란색 */
   font-size: 28px;
   font-weight: 800;
   margin-bottom: 8px;
 }
 
 .notice {
-  color: #E11D48; /* 세련된 장미색 */
+  color: #E11D48;
+  /* 세련된 장미색 */
   background-color: #FFF1F2;
   padding: 8px 16px;
-  border-radius: 12px; /* 더 동글동글하게 */
+  border-radius: 12px;
+  /* 더 동글동글하게 */
   font-size: 14px;
   font-weight: 800;
   display: inline-block;
@@ -156,7 +168,8 @@ const getCategoryIcon = (category) => {
 
 .search-input:focus {
   border-color: #38BDF8;
-  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15); /* 파란색 포커스 링 */
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15);
+  /* 파란색 포커스 링 */
 }
 
 .write-btn {
@@ -174,7 +187,8 @@ const getCategoryIcon = (category) => {
 
 .write-btn:hover {
   background-color: #38BDF8;
-  transform: translateY(-3px); /* 둥둥 떠오름 */
+  transform: translateY(-3px);
+  /* 둥둥 떠오름 */
   box-shadow: 0 6px 15px rgba(56, 189, 248, 0.4);
 }
 
@@ -183,7 +197,8 @@ const getCategoryIcon = (category) => {
   display: flex;
   gap: 12px;
   margin-bottom: 25px;
-  flex-wrap: wrap; /* 모바일 대응 */
+  flex-wrap: wrap;
+  /* 모바일 대응 */
 }
 
 .filter-btn {
@@ -226,9 +241,11 @@ const getCategoryIcon = (category) => {
 }
 
 .post-card:hover {
-  transform: translateY(-5px); /* 위로 뿅! */
+  transform: translateY(-5px);
+  /* 위로 뿅! */
   border-color: #BAE6FD;
-  box-shadow: 0 12px 25px rgba(120, 194, 243, 0.15); /* 하늘색 그림자 */
+  box-shadow: 0 12px 25px rgba(120, 194, 243, 0.15);
+  /* 하늘색 그림자 */
 }
 
 .post-info {
@@ -271,7 +288,8 @@ const getCategoryIcon = (category) => {
   color: #64748B;
   display: flex;
   gap: 12px;
-  margin-left: 60px; /* 번호와 카테고리 너비만큼 띄움 */
+  margin-left: 60px;
+  /* 번호와 카테고리 너비만큼 띄움 */
 }
 
 .divider {
@@ -326,33 +344,36 @@ const getCategoryIcon = (category) => {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .action-area {
     width: 100%;
-    flex-direction: column; /* 검색창과 버튼을 세로로 */
+    flex-direction: column;
+    /* 검색창과 버튼을 세로로 */
   }
-  
+
   .search-input {
-    width: 100%; /* 모바일 화면에 꽉 차게 */
+    width: 100%;
+    /* 모바일 화면에 꽉 차게 */
     box-sizing: border-box;
   }
-  
+
   .write-btn {
     width: 100%;
   }
-  
+
   .post-title {
-    max-width: 100%; /* 모바일에서는 제목을 전체 너비로 */
+    max-width: 100%;
+    /* 모바일에서는 제목을 전체 너비로 */
   }
 
   /* 모바일에서는 날짜가 우측 상단 고정이 아니라 아래로 내려오게 */
   .post-date {
-    position: static; 
+    position: static;
     margin-left: 60px;
     margin-top: 5px;
     font-size: 13px;
   }
-  
+
   .post-meta {
     margin-bottom: 5px;
   }
