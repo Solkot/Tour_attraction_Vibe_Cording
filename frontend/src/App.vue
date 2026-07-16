@@ -98,13 +98,16 @@ const sendMessage = async () => {
   loading.value = true;
 
   try {
-    const response = await fetch(`${BASE_URL}/api/chat`, {
+    // 🟢 수정된 Vue 코드
+  const response = await fetch(`${BASE_URL}/api/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       user_query: query,
       lat: lat.value,
-      lon: lon.value
+      lon: lon.value,
+      radius_km: 2.0,  // 👈 추가: 스키마 요구사항 매칭
+      limit: 10        // 👈 추가: 스키마 요구사항 매칭
     })
   });
 
