@@ -104,10 +104,11 @@ const sendMessage = async () => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       user_query: query,
-      lat: lat.value,
-      lon: lon.value,
-      radius_km: 2.0,  // 👈 추가: 스키마 요구사항 매칭
-      limit: 10        // 👈 추가: 스키마 요구사항 매칭
+      // 소수점 아래 4자리까지만 남기고 숫자로 변환하여 전송
+      lat: parseFloat(Number(lat.value).toFixed(4)),
+      lon: parseFloat(Number(lon.value).toFixed(4)),
+      radius_km: 2.0,
+      limit: 10
     })
   });
 
