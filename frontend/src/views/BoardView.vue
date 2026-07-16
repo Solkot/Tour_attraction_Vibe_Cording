@@ -12,19 +12,15 @@
     </div>
 
     <div class="category-filters">
-      <button class="filter-btn" :class="{ active: activeCategory === '' }" @click="filterByCategory('')">전체</button>
-
-      <button class="filter-btn" :class="{ active: activeCategory === '관광지' }" @click="filterByCategory('관광지')">🏛️
-        관광지</button>
-
-      <button class="filter-btn" :class="{ active: activeCategory === '음식점' }" @click="filterByCategory('음식점')">🍽️
-        음식점</button>
-
-      <button class="filter-btn" :class="{ active: activeCategory === '숙소' }" @click="filterByCategory('숙소')">⛺
-        숙소</button>
-
-      <button class="filter-btn" :class="{ active: activeCategory === '쇼핑' }" @click="filterByCategory('쇼핑')">🛒
-        쇼핑</button>
+<button class="filter-btn" :class="{ active: activeCategory === '' }" @click="filterByCategory('')">전체</button>
+      <button class="filter-btn" :class="{ active: activeCategory === '관광지' }" @click="filterByCategory('관광지')">🏛️ 관광지</button>
+      <button class="filter-btn" :class="{ active: activeCategory === '숙박' }" @click="filterByCategory('숙박')">⛺ 숙박</button>
+      <button class="filter-btn" :class="{ active: activeCategory === '쇼핑' }" @click="filterByCategory('쇼핑')">🛒 쇼핑</button>
+      <button class="filter-btn" :class="{ active: activeCategory === '음식점' }" @click="filterByCategory('음식점')">🍽️ 음식점</button>
+      <button class="filter-btn" :class="{ active: activeCategory === '문화시설' }" @click="filterByCategory('문화시설')">🎨 문화시설</button>
+      <button class="filter-btn" :class="{ active: activeCategory === '축제공연행사' }" @click="filterByCategory('축제공연행사')">🎉 축제공연행사</button>
+      <button class="filter-btn" :class="{ active: activeCategory === '여행코스' }" @click="filterByCategory('여행코스')">🗺️ 여행코스</button>
+      <button class="filter-btn" :class="{ active: activeCategory === '레포츠' }" @click="filterByCategory('레포츠')">🏄 레포츠</button>
     </div>
 
     <div class="post-list">
@@ -96,14 +92,18 @@ const formatDate = (dateString) => {
   return date.toLocaleDateString() 
 }
 
-// 카테고리 아이콘 변환 함수
 const getCategoryIcon = (category) => {
   if (category === '관광지') return '🏛️ 관광지'
-  if (category === '음식점') return '🍽️ 음식점'
-  if (category === '숙소') return '⛺ 숙소'
+  if (category === '숙박') return '⛺ 숙박'
   if (category === '쇼핑') return '🛒 쇼핑'
+  if (category === '음식점') return '🍽️ 음식점'
+  if (category === '문화시설') return '🎨 문화시설'
+  if (category === '축제공연행사') return '🎉 축제공연행사'
+  if (category === '여행코스') return '🗺️ 여행코스'
+  if (category === '레포츠') return '🏄 레포츠'
   return category
 }
+
 </script>
 
 <style scoped>

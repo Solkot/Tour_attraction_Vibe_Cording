@@ -37,24 +37,42 @@
         <p class="result-count">
           총 <strong>{{ placeList.length }}</strong>개의 장소를 찾았어요!
         </p>
+        <!-- 🌟 새롭게 추가된 필터 버튼 영역! -->
+        <div v-if="placeList.length > 0" class="filter-buttons">
+          <button v-for="cat in categories" :key="cat" class="filter-btn" :class="{ active: activeFilter === cat }"
+            @click="activeFilter = cat">
+            {{ cat === '전체' ? '🌐 전체' : getCategoryEmoji(cat) }}
+          </button>
+        </div>
 
         <div v-if="placeList.length > 0" class="place-list">
-          <article v-for="(place, index) in placeList" :key="index" class="place-card">
-            <div class="place-header">
-              <span class="badge" :class="getCategoryClass(place.category)">
-                {{ place.category }}
-              </span>
 
-              <span class="region-label">🚩 {{ place.region }}</span>
-            </div>
+          <!-- 🌟 카테고리 단위로 묶어서 반복 -->
+          <div v-for="(places, category) in groupedPlaces" :key="category" class="category-group">
 
-            <h4 class="place-name">{{ place.name }}</h4>
-            <p class="place-desc">{{ place.desc }}</p>
+            <!-- 카테고리 제목 (이모티콘 + 갯수) -->
+            <h4 class="category-title">
+              {{ getCategoryEmoji(category) }} <span class="count-badge">{{ places.length }}</span>
+            </h4>
 
-            <button type="button" class="add-course-btn" @click="courseStore.addCourse(place)">
-              📌 내 코스에 추가
-            </button>
-          </article>
+            <!-- 해당 카테고리에 속한 장소 카드들 -->
+            <article v-for="(place, index) in places" :key="place.name" class="place-card">
+              <div class="place-header">
+                <span class="badge" :class="getCategoryClass(place.category)">
+                  {{ place.category }}
+                </span>
+                <span class="region-label">🚩 {{ place.region }}</span>
+              </div>
+
+              <h4 class="place-name">{{ place.name }}</h4>
+              <p class="place-desc">{{ place.desc }}</p>
+
+              <button type="button" class="add-course-btn" @click="courseStore.addCourse(place)">
+                📌 내 코스에 추가
+              </button>
+            </article>
+
+          </div>
         </div>
 
         <div v-else class="empty-result">
@@ -95,10 +113,38 @@ const regionData = {
   산동읍: ['옥계동', '해평면', '장천면'],
 };
 
+const getCategoryEmoji = (category) => {
+  const emojis = {
+    '관광지': '🏛️ 관광지',
+    '숙박': '⛺ 숙박',
+    '쇼핑': '🛒 쇼핑',
+    '음식점': '🍽️ 음식점',
+    '문화시설': '🎨 문화시설',
+    '축제공연행사': '🎉 축제공연행사',
+    '여행코스': '🗺️ 여행코스',
+    '레포츠': '🏄 레포츠',
+  };
+  return emojis[category] || `📍 ${category}`;
+};
+
 const regions = Object.keys(regionData).map((name) => ({ name }));
 
 const selectedRegion = ref('');
 const placeList = ref([]);
+
+const categories = ['전체', '관광지', '문화시설', '축제공연행사', '여행코스', '레포츠', '숙박', '쇼핑', '음식점'];
+const activeFilter = ref('전체');
+
+watch(selectedRegion, () => {
+  activeFilter.value = '전체';
+});
+
+const filteredPlaceList = computed(() => {
+  if (activeFilter.value === '전체') {
+    return placeList.value; // 전체면 다 보여줌
+  }
+  return placeList.value.filter(place => place.category === activeFilter.value); // 아니면 해당 카테고리만!
+});
 
 const adjacentRegions = computed(() => {
   if (!selectedRegion.value) return [];
@@ -155,6 +201,20 @@ const getCategoryClass = (category) => {
   return 'category-default';
 };
 
+const groupedPlaces = computed(() => {
+  const groups = {};
+
+  // 🚨 여기를 filteredPlaceList.value로 바꿨습니다!
+  filteredPlaceList.value.forEach(place => {
+    if (!groups[place.category]) {
+      groups[place.category] = [];
+    }
+    groups[place.category].push(place);
+  });
+
+  return groups;
+});
+
 let mapInstance = null;
 let markers = [];
 
@@ -171,9 +231,9 @@ const initMap = () => {
   window.kakao.maps.load(() => {
     const options = {
       center: new window.kakao.maps.LatLng(36.119485, 128.344573), // 구미시청
-      level: 5 
+      level: 5
     };
-    
+
     // 지도를 만들고 mapInstance 변수에 저장!
     mapInstance = new window.kakao.maps.Map(container, options);
     console.log('✨ 카카오맵 렌더링 완료!');
@@ -614,4 +674,103 @@ onMounted(() => {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
   border: 2px solid #FFFFFF;
 }
+
+/* 🌟 카테고리 그룹 스타일 */
+.category-group {
+  margin-bottom: 30px;
+}
+
+.category-title {
+  margin: 0 0 15px 5px;
+  color: #0369a1;
+  font-size: 17px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e0f2fe;
+}
+
+.category-title .count-badge {
+  background-color: #38bdf8;
+  color: white;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+/* 🌟 추가된 카테고리 뱃지 컬러 (필요시 getCategoryClass 함수에도 연결해서 쓰시면 됩니다) */
+.category-culture {
+  background-color: #f472b6;
+}
+
+/* 분홍: 문화시설 */
+.category-festival {
+  background-color: #ef4444;
+}
+
+/* 빨강: 축제/공연 */
+.category-course {
+  background-color: #14b8a6;
+}
+
+/* 청록: 여행코스 */
+.category-leisure {
+  background-color: #f97316;
+}
+
+/* 🌟 카테고리 필터 버튼 디자인 */
+.filter-buttons {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 15px;
+  padding-bottom: 8px;
+  overflow-x: auto;
+  /* 버튼이 넘치면 가로 스크롤 생성 */
+  flex-shrink: 0;
+}
+
+/* 가로 스크롤바 커스텀 (얇고 예쁘게) */
+.filter-buttons::-webkit-scrollbar {
+  height: 6px;
+}
+
+.filter-buttons::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.filter-buttons::-webkit-scrollbar-thumb {
+  background-color: #bae6fd;
+  border-radius: 10px;
+}
+
+.filter-btn {
+  padding: 8px 16px;
+  background-color: #f1f5f9;
+  color: #64748b;
+  border: 1px solid transparent;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  /* 글자 줄바꿈 방지 */
+  transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+  background-color: #e0f2fe;
+  color: #0369a1;
+}
+
+/* 클릭되어 활성화된 상태의 디자인 */
+.filter-btn.active {
+  background-color: #38bdf8;
+  color: white;
+  box-shadow: 0 4px 10px rgba(56, 189, 248, 0.3);
+}
+
+/* 주황: 레포츠 */
 </style>

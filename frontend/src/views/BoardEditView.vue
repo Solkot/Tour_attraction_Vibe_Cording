@@ -10,9 +10,13 @@
         <label>카테고리</label>
         <select class="form-input" v-model="editPost.category">
           <option value="관광지">🏛️ 관광지</option>
-          <option value="음식점">🍽️ 음식점</option>
-          <option value="숙소">⛺ 숙소</option>
+          <option value="숙박">⛺ 숙박</option>
           <option value="쇼핑">🛒 쇼핑</option>
+          <option value="음식점">🍽️ 음식점</option>
+          <option value="문화시설">🎨 문화시설</option>
+          <option value="축제공연행사">🎉 축제공연행사</option>
+          <option value="여행코스">🗺️ 여행코스</option>
+          <option value="레포츠">🏄 레포츠</option>
         </select>
       </div>
 
