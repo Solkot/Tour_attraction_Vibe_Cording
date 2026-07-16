@@ -51,6 +51,7 @@
   </div>
 </template>
 
+<script setup>
 import { ref, onMounted, nextTick } from 'vue';
 
 // 상태 관리
