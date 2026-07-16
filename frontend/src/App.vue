@@ -3,9 +3,14 @@
     <header class="gnb">
       <div class="logo">MyGumi</div>
       <nav class="nav-links">
-        <router-link to="/" class="nav-item">탐색(지도)</router-link>
-        <router-link to="/board" class="nav-item">익명 게시판</router-link>
-        <router-link to="/course" class="nav-item">마이 코스</router-link>
+        <nav class="nav-links">
+          <nav class="nav-links">
+            <router-link to="/" class="nav-item">홈</router-link>
+            <router-link to="/map" class="nav-item">검색</router-link>
+            <router-link to="/board" class="nav-item">익명 게시판</router-link>
+            <router-link to="/course" class="nav-item">마이 코스</router-link>
+          </nav>
+        </nav>
       </nav>
       <div class="profile-icon">🐰</div>
     </header>
@@ -34,13 +39,8 @@
       </div>
 
       <div class="chat-input-area">
-        <input 
-          type="text" 
-          v-model="userQuery" 
-          @keyup.enter="sendMessage"
-          placeholder="마이구미에게 무엇이든 물어보세요..." 
-          class="chat-input" 
-        />
+        <input type="text" v-model="userQuery" @keyup.enter="sendMessage" placeholder="마이구미에게 무엇이든 물어보세요..."
+          class="chat-input" />
         <button class="send-btn" @click="sendMessage">전송</button>
       </div>
     </div>
@@ -132,9 +132,11 @@ const sendMessage = async () => {
 .user-message {
   background-color: #78C2F3;
   color: white;
-  margin-left: auto; /* 오른쪽 정렬 */
+  margin-left: auto;
+  /* 오른쪽 정렬 */
   border-top-right-radius: 0;
 }
+
 .ai-message {
   background-color: white;
   border: 1px solid #E2E8F0;
