@@ -26,15 +26,22 @@
         <button class="close-btn" @click="toggleChat">✖</button>
       </div>
 
-      <div class="chat-body">
-        <div class="message ai-message">
-          안녕하세요! 구미 여행 가이드입니다. 관광지, 맛집, 교통편 등 현지에 대해 무엇이든 물어보세요!
+      <div class="chat-body" ref="chatBody">
+        <div v-for="(msg, index) in messages" :key="index" :class="['message', msg.role + '-message']">
+          {{ msg.text }}
         </div>
+        <div v-if="loading" class="message ai-message">답변을 생각 중입니다...</div>
       </div>
 
       <div class="chat-input-area">
-        <input type="text" placeholder="마이구미에게 무엇이든 물어보세요..." class="chat-input" />
-        <button class="send-btn">전송</button>
+        <input 
+          type="text" 
+          v-model="userQuery" 
+          @keyup.enter="sendMessage"
+          placeholder="마이구미에게 무엇이든 물어보세요..." 
+          class="chat-input" 
+        />
+        <button class="send-btn" @click="sendMessage">전송</button>
       </div>
     </div>
 
@@ -44,14 +51,71 @@
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 
-// 챗봇 창 열림/닫힘 상태
+// 상태 관리
 const isChatOpen = ref(false);
+const userQuery = ref('');
+const loading = ref(false);
+const chatBody = ref(null);
+const lat = ref(36.1195); // 기본값: 구미
+const lon = ref(128.3444);
+
+const messages = ref([
+  { role: 'ai', text: '안녕하세요! 구미 여행 가이드입니다. 무엇을 도와드릴까요?' }
+]);
+
+// 위치 정보 가져오기
+const getDeviceLocation = () => {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        lat.value = position.coords.latitude;
+        lon.value = position.coords.longitude;
+      },
+      () => { console.warn("위치 정보 접근이 거부되었습니다."); }
+    );
+  }
+};
+
+onMounted(() => {
+  getDeviceLocation();
+});
 
 const toggleChat = () => {
   isChatOpen.value = !isChatOpen.value;
+};
+
+// 서버와 통신하는 함수
+const sendMessage = async () => {
+  if (!userQuery.value.trim()) return;
+
+  const query = userQuery.value;
+  messages.value.push({ role: 'user', text: query });
+  userQuery.value = '';
+  loading.value = true;
+
+  try {
+    const response = await fetch('http://localhost:8000/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_query: query,
+        lat: lat.value,
+        lon: lon.value
+      })
+    });
+
+    const data = await response.json();
+    messages.value.push({ role: 'ai', text: data.reply });
+  } catch (error) {
+    messages.value.push({ role: 'ai', text: '서버와 연결할 수 없습니다.' });
+  } finally {
+    loading.value = false;
+    // 메시지 추가 후 스크롤 아래로 내리기
+    await nextTick();
+    if (chatBody.value) chatBody.value.scrollTop = chatBody.value.scrollHeight;
+  }
 };
 </script>
 
@@ -60,6 +124,20 @@ const toggleChat = () => {
 
 * {
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+}
+
+/* 기존 스타일은 그대로 유지하시고, 아래 메시지 스타일만 추가하세요 */
+.user-message {
+  background-color: #78C2F3;
+  color: white;
+  margin-left: auto; /* 오른쪽 정렬 */
+  border-top-right-radius: 0;
+}
+.ai-message {
+  background-color: white;
+  border: 1px solid #E2E8F0;
+  color: #334155;
+  border-top-left-radius: 0;
 }
 
 .app-container {
