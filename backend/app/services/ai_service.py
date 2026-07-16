@@ -58,7 +58,7 @@ def get_ai_response(
 
     provider = os.getenv(
         "AI_PROVIDER",
-        "openai",
+        "gemini",
     ).strip().lower()
 
     if provider == "gemini":
