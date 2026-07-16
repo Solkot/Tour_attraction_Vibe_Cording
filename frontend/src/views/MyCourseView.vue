@@ -31,12 +31,17 @@
       </div>
 
       <div class="preview-section card">
-        <h3 class="section-title">🗺️ 코스 요약</h3>
-        <div class="preview-box">
-          <div class="empty-state">
-            <p>총 <strong style="font-size: 24px; color:#0369A1;">{{ courseStore.totalCount }}</strong>개의 장소가</p>
-            <p>코스에 담겨 있습니다.</p>
+        <h3 class="section-title">🗺️ 코스 동선 미리보기</h3>
+        
+        <div id="course-map" class="preview-box">
+          <div v-if="courseStore.totalCount === 0" class="empty-map-overlay">
+            <p>장소를 추가하시면</p>
+            <p>여기에 여행 동선이 나타납니다!</p>
           </div>
+        </div>
+
+        <div class="summary-text">
+          <p>총 <strong style="font-size: 20px; color:#0369A1;">{{ courseStore.totalCount }}</strong>개의 장소가 코스에 담겨 있습니다.</p>
         </div>
       </div>
     </div>
@@ -44,8 +49,96 @@
 </template>
 
 <script setup>
+import { onMounted, watch } from 'vue';
 import { useCourseStore } from '../stores/courseStore';
+
 const courseStore = useCourseStore();
+
+let mapInstance = null;
+let markers = [];   // 마커들을 담을 배열
+let polyline = null; // 동선(선) 객체
+
+// 🗺️ 1. 지도 초기화 함수
+const initMap = () => {
+  const container = document.getElementById('course-map');
+  if (!container) return;
+
+  // 카카오맵 스크립트 로드 대기 (탐색 화면과 같은 원리)
+  if (!window.kakao || !window.kakao.maps) {
+    setTimeout(initMap, 500);
+    return;
+  }
+
+  window.kakao.maps.load(() => {
+    const options = {
+      center: new window.kakao.maps.LatLng(36.119485, 128.344573), // 기본 구미시청
+      level: 6
+    };
+    mapInstance = new window.kakao.maps.Map(container, options);
+
+    // 처음에 이미 담긴 코스가 있다면 동선 그리기
+    if (courseStore.courseList.length > 0) {
+      drawCourse(courseStore.courseList);
+    }
+  });
+};
+
+// 📍 2. 마커와 동선을 그려주는 함수
+const drawCourse = (places) => {
+  if (!mapInstance) return;
+
+  // 기존에 그려진 마커와 선 지우기 (초기화)
+  markers.forEach(marker => marker.setMap(null));
+  markers = [];
+  if (polyline) {
+    polyline.setMap(null);
+  }
+
+  // 장소가 없으면 함수 종료
+  if (places.length === 0) return;
+
+  const bounds = new window.kakao.maps.LatLngBounds(); // 한눈에 보이게 할 영역
+  const linePath = []; // 선을 연결할 좌표들
+
+  places.forEach((place, index) => {
+    // 🚨 백엔드 데이터에 lat, lng (위도, 경도) 값이 있다고 가정!
+    const position = new window.kakao.maps.LatLng(place.lat, place.lng);
+    
+    // 선 경로에 좌표 추가
+    linePath.push(position);
+    bounds.extend(position); // 화면 영역에 좌표 포함
+
+    // 마커 생성
+    const marker = new window.kakao.maps.Marker({
+      map: mapInstance,
+      position: position,
+      title: `${index + 1}. ${place.name}` // 마우스 올리면 순서와 이름 표시
+    });
+    markers.push(marker);
+  });
+
+  // 〰️ 선(Polyline) 생성 및 지도에 표시
+  polyline = new window.kakao.maps.Polyline({
+    path: linePath, // 연결할 좌표 배열
+    strokeWeight: 4, // 선 두께
+    strokeColor: '#38BDF8', // 예쁜 파란색
+    strokeOpacity: 0.8, // 불투명도
+    strokeStyle: 'solid' // 선 스타일 (solid, shortdash 등)
+  });
+  polyline.setMap(mapInstance);
+
+  // 🔍 모든 마커가 보이도록 지도 화면 이동 및 확대/축소 자동 조절!
+  mapInstance.setBounds(bounds);
+};
+
+// 💡 3. 코스 목록이 변할 때마다 자동으로 다시 그리기
+watch(() => courseStore.courseList, (newList) => {
+  drawCourse(newList);
+}, { deep: true });
+
+onMounted(() => {
+  initMap();
+});
 </script>
 
 <style scoped>
@@ -190,15 +283,39 @@ const courseStore = useCourseStore();
   color: #991B1B;
 }
 
+/* 🌟 추가 & 수정된 스타일 */
 .preview-box {
-  height: 300px;
-  background-color: #E8F4F8;
-  border-radius: 8px;
+  height: 450px; /* 지도가 시원하게 보이도록 높이 키움 */
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #E2E8F0;
+}
+
+.empty-map-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(248, 250, 252, 0.9); /* 반투명 배경 */
+  z-index: 10;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  font-weight: 800;
+  font-size: 16px;
+  color: #94A3B8;
   text-align: center;
 }
+
+.summary-text {
+  margin-top: 15px;
+  text-align: center;
+  color: #64748B;
+  background-color: #F0F9FF;
+  padding: 15px;
+  border-radius: 12px;
+}
+.summary-text p { margin: 0; }
 
 .empty-state {
   color: #0369A1;

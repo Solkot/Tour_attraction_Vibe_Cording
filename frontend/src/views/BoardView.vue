@@ -71,13 +71,12 @@ const fetchPosts = async (category = '') => {
   }
 }
 
-// 🌟 귀여운 동물 이모티콘 리스트 (원하는 동물로 맘껏 추가하세요!)
 const emoticons = ['🐰', '🦊', '🐻', '🐼', '🐯', '🦁', '🐨', '🐸', '🐹', '🐭', '🐱', '🐶', '🦄', '🦦', '🦥']
 
-// 🌟 게시글 번호(id)를 나눠서 항상 동일한 랜덤 이모티콘이 나오도록 하는 마법의 함수!
+
 const getAuthorEmoji = (id) => {
   if (!id) return '👤' // id가 없을 경우 기본값
-  return emoticons[id % emoticons.length] // 리스트 길이에 맞춰서 돌아가며 배정됩니다.
+  return emoticons[id % emoticons.length] 
 }
 
 // 화면이 처음 켜질 때 전체 목록 불러오기
@@ -91,11 +90,10 @@ const filterByCategory = (category) => {
   fetchPosts(category)
 }
 
-// 백엔드 날짜(2026-07-15T...)를 예쁘게 변환하는 함수
 const formatDate = (dateString) => {
   if (!dateString) return ''
   const date = new Date(dateString)
-  return date.toLocaleDateString() // 예: 2026. 7. 15.
+  return date.toLocaleDateString() 
 }
 
 // 카테고리 아이콘 변환 함수
@@ -109,7 +107,6 @@ const getCategoryIcon = (category) => {
 </script>
 
 <style scoped>
-/* 🌟 1. 전체 레이아웃 */
 .board-view {
   max-width: 2200px;
   margin: 0 auto;
@@ -117,14 +114,12 @@ const getCategoryIcon = (category) => {
   background-color: transparent;
 }
 
-/* 🌟 2. 상단 헤더 영역 */
 .board-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
   margin-bottom: 30px;
   flex-wrap: wrap;
-  /* 모바일에서 좁아지면 아래로 떨어지게 */
   gap: 15px;
 }
 
@@ -150,7 +145,6 @@ const getCategoryIcon = (category) => {
   box-shadow: 0 4px 6px rgba(225, 29, 72, 0.05);
 }
 
-/* 🌟 3. 액션(검색, 글쓰기) 영역 */
 .action-area {
   display: flex;
   gap: 12px;
