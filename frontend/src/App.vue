@@ -97,7 +97,7 @@ const sendMessage = async () => {
   loading.value = true;
 
   try {
-    const response = await fetch('http://localhost:8000/api/chat', {
+    const response = await fetch('VITE_API_BASE_URL', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
